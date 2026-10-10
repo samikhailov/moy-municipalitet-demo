@@ -1,5 +1,5 @@
-import { ChevronDownIcon, HouseIcon, LogOutIcon, RotateCcwIcon } from "lucide-react"
-import { NavLink, Outlet, useNavigate } from "react-router-dom"
+import { ChevronDownIcon, ClipboardListIcon, HouseIcon, LogOutIcon, RotateCcwIcon } from "lucide-react"
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom"
 
 import { Brand } from "@/components/blocks/brand"
 import { initials } from "@/components/blocks/avatar-group"
@@ -10,10 +10,18 @@ import { ROLE_LABELS } from "@/config/users"
 import { cn } from "@/lib/utils"
 import { useStore } from "@/store/store"
 
+const navItemClass = (active: boolean) =>
+  cn(
+    "flex h-10 items-center gap-3 rounded-md px-3 text-base font-medium transition-colors outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&_svg]:size-5",
+    active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-muted hover:text-foreground"
+  )
+
 /** Каркас страниц после входа: боковое меню и шапка с пользователем. */
 export function AppLayout() {
   const { user, logout, resetDemo } = useStore()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const onTask = pathname.startsWith("/tasks/")
   if (!user) return null
 
   return (
@@ -22,19 +30,15 @@ export function AppLayout() {
       <nav aria-label="Основное меню" className="sticky top-0 flex h-screen flex-col gap-6 px-4 py-5">
         <Brand className="px-2" />
         <div className="flex flex-col gap-1">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              cn(
-                "flex h-10 items-center gap-3 rounded-md px-3 text-base font-medium transition-colors outline-none focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring [&_svg]:size-5",
-                isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-muted hover:text-foreground"
-              )
-            }
-          >
+          <NavLink to="/" end className={({ isActive }) => navItemClass(isActive)}>
             <HouseIcon aria-hidden="true" />
             Главная
           </NavLink>
+          {/* Экрана списка поручений в демо нет: пункт не ведёт никуда, но выделен на создании и карточке поручения. */}
+          <button type="button" className={cn(navItemClass(onTask), "text-left")} aria-current={onTask ? "page" : undefined}>
+            <ClipboardListIcon aria-hidden="true" />
+            Поручения
+          </button>
         </div>
         <div className="flex-1" />
         <Button
